@@ -19,6 +19,10 @@ import org.hamcrest.Matchers.allOf
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import otus.demo.totalcoverage.EditTextObject.Companion.editTextObjectWithId
+import otus.demo.totalcoverage.RecyclerObject.Companion.recyclerWithId
+import otus.demo.totalcoverage.TextObject.Companion.textObjectWithId
+import otus.demo.totalcoverage.ViewObject.Companion.objectWithId
 import otus.demo.totalcoverage.expenseslist.ExpensesViewHolder
 
 @RunWith(AndroidJUnit4::class)
@@ -45,24 +49,40 @@ class UserFlowsTest {
     }
 
     @Test
+    fun pageObjectShouldShowFabAndEmptyText() {
+        textObjectWithId(R.id.empty_text) {
+            isDisplayed()
+            isTextTheSame("No expenses :)")
+        }
+
+        objectWithId(R.id.add_expense_fab) {
+            isDisplayed()
+        }
+    }
+
+    @Test
     fun shouldAddItem() {
-        onView(withId(R.id.add_expense_fab))
-            .perform(click())
+        objectWithId(R.id.add_expense_fab) {
+            click()
+        }
 
-        onView(withId(R.id.title_edittext)).perform(
-            ViewActions.typeText("Food")
-        )
-        onView(withId(R.id.amount_edittext)).perform(
-            ViewActions.typeText("2000")
-        )
-        onView(withId(R.id.comment_edittext)).perform(
-            ViewActions.typeText("It was good")
-        )
+        editTextObjectWithId(R.id.title_edittext) {
+            typeText("Food")
+        }
+        editTextObjectWithId(R.id.amount_edittext) {
+            typeText("2000")
+        }
+        editTextObjectWithId(R.id.comment_edittext) {
+            typeText("It was good")
+        }
 
-        onView(withId(R.id.submit_button)).perform(click())
+        objectWithId(R.id.submit_button) {
+            click()
+        }
 
-        onView(withId(R.id.expenses_recycler))
-            .check(matches(atPosition(0, hasDescendant(withText("Food")))))
+        recyclerWithId(R.id.expenses_recycler) {
+            textAtPosition(0, "Food")
+        }
     }
 
     @Test
@@ -108,20 +128,5 @@ class DoubleClickAction : ViewAction {
     override fun perform(uiController: UiController?, view: View) {
         view.performClick()
         view.performClick()
-    }
-}
-
-fun atPosition(position: Int, matcher: Matcher<View>) = RecyclerAtPositionMatcher(position, matcher)
-
-class RecyclerAtPositionMatcher(
-    private val position: Int,
-    private val matcher: Matcher<View>
-) : BoundedMatcher<View, RecyclerView>(RecyclerView::class.java) {
-    override fun describeTo(description: Description?) {
-        println("Not matches")
-    }
-
-    override fun matchesSafely(item: RecyclerView): Boolean {
-        return matcher.matches(item.findViewHolderForAdapterPosition(position)?.itemView)
     }
 }
